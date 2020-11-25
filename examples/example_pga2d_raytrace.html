@@ -145,7 +145,7 @@ var app = Algebra(2,0,1).inline(helpers=>{
             return [ intersect&&sameside, (point & p).Length, p, out_ray ];
           },
           render    : function() { return [
-            0x008800, this.backplane, "image plane", this.point1, this.point2, this.point3, "F", '<G stroke-width="0.02">', [this.point1,this.point2], '</G>'    
+            0x008800, this.backplane, "back focal plane", this.point1, this.point2, this.point3, "F", '<G stroke-width="0.02">', [this.point1,this.point2], '</G>'    
           ]}
         }
     elements.push(lens); render.splice(renderLength,1000,...lens.render()); renderLength = render.length;    
