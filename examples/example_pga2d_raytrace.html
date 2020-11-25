@@ -123,6 +123,8 @@ var app = Algebra(2,0,1).inline(helpers=>{
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   const addThinLens = ()=>{
     var lens = {
+          // TODO define the lens by center, focal point, then edge (how to confine points to planes?  Just automatically project?)
+          // FIXME rays passing through opposite sides of the lens see opposite focal lengths.  Need to mark a "front" side of the lens and be consistent with signs.
           point1    : point (0.8,0.6),
           point2    : point (0.8,-0.4),
           point3    : ()=>(1 + (lens.point1 & lens.point2)*.125e0) >>> (lens.point1 + lens.point2),
