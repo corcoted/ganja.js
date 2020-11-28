@@ -123,28 +123,30 @@ var app = Algebra(2,0,1).inline(helpers=>{
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   const addThinLens = ()=>{
     var lens = {
-          // TODO define the lens by center, focal point, then edge (how to confine points to planes?  Just automatically project?)
-          // FIXME rays passing through opposite sides of the lens see opposite focal lengths.  Need to mark a "front" side of the lens and be consistent with signs.
-          point1    : point (0.8,0.6),
-          point2    : point (0.8,-0.4),
-          point3    : ()=>(1 + (lens.point1 & lens.point2)*.125e0) >>> (lens.point1 + lens.point2),
-          backplane : ()=>(1 - (lens.point1 & lens.point2)*.125e0) >>> lens.point1&lens.point2,
+          // FIXME when point3 is behind lens (negative focal length), wrong half of outgoing rays are drawn.
+          // FIXME rays going through the wrong side of the lens see opposite focal length
+          point1    : point (0.8,0.6), // edge
+          point2    : point (0.8,-0.4), // edge
+          point3    : point (0.55, 0.1), // focal point (let this float)
+          sign      : () => Math.sign((lens.point1 & lens.point2 & lens.point3)), // sign of focal length
+          backpoint : ()=> (lens.point1 & lens.point2) >>> lens.point3,
+          backplane : ()=> ((lens.point1 & lens.point2)|lens.backpoint)*lens.backpoint,
           intersect : function([ray,point]) {
             // The plane of the lens
             var lens    = (this.point1 & this.point2);
             // The intersection point with the ray
-            var p         = (ray ^ lens).Normalized;
-            p = p*p.e12; // make sure its positive.
+            var p         = (ray ^ lens).Normalized; // TODO see if the sign is preserved
+            //p = p*p.e12; // make sure its positive.
             // The midpoint, length, and intersection check.
             var midpoint  = (this.point1 + this.point2)/2;
             var length    = (this.point1 & this.point2).Length;
             var intersect = (midpoint & p).Length < length/2;
-            var sameside  = (ray|(point&p)).s > 0;
+            //var sameside  = (ray|(point&p)).s*this.sign > 0;
             // The ray projected to the focal point.
             var r_through_f = (ray|this.point3)*this.point3;
             // Calculate output ray.
             var out_ray   = p&((r_through_f ^ lens | lens) ^ this.backplane).Normalized;
-            return [ intersect&&sameside, (point & p).Length, p, out_ray ];
+            return [ intersect, (point & p).Length, p, out_ray ];
           },
           render    : function() { return [
             0x008800, this.backplane, "back focal plane", this.point1, this.point2, this.point3, "F", '<G stroke-width="0.02">', [this.point1,this.point2], '</G>'    
